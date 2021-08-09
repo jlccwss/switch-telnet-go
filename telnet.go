@@ -1,6 +1,7 @@
 package telnet
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"strings"
@@ -94,6 +95,10 @@ func (c *Client) Cmd(shell string) (context string, err error) {
 			break
 		}
 		context += string(c.buf[0:n])
+		if strings.Contains(context, "Invalid") || strings.Contains(context, "Error") {
+			err = errors.New(context)
+			break
+		}
 		if strings.Contains(string(c.buf[0:n]), ">") || strings.Contains(string(c.buf[0:n]), "]") || strings.Contains(string(c.buf[0:n]), "#") || strings.Contains(string(c.buf[0:n]), "Password:") {
 			break
 		}
