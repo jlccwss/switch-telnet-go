@@ -35,10 +35,12 @@ func (c *Client) Connect(address string) (err error) {
 
 	for {
 		n, err := c.Conn.Read(c.buf[0:])
+		fmt.Printf("result: %s\n", string(c.buf[0:n]))
 		if err != nil {
 			break
 		}
-		if strings.Contains(string(c.buf[0:n]), "Username:") {
+		// "login:" is for h3c, "Username:" is for cisco and huawei
+		if strings.Contains(string(c.buf[0:n]), "Username:") || strings.Contains(string(c.buf[0:n]), "login:") {
 			break
 		}
 	}
@@ -53,54 +55,31 @@ func (c *Client) Login(username string, password string) error {
 		return err
 	}
 
-	n, err = c.Conn.Read(c.buf[0:])
-	if err != nil {
-		return err
+	for {
+		time.Sleep(time.Duration(1) * time.Second)
+		n, err = c.Conn.Read(c.buf[0:])
+		if err != nil {
+			return err
+		}
+		if strings.Contains(string(c.buf[0:n]), "Pass") {
+			break
+		}
 	}
 
 	n, err = c.Write(c.Conn, []byte(password+"\n"))
 	if err != nil {
 		return err
 	}
-	n, err = c.Conn.Read(c.buf[0:])
-	if err != nil {
-		return err
+	for {
+		n, err = c.Conn.Read(c.buf[0:])
+		if err != nil {
+			return err
+		}
+		if strings.Contains(string(c.buf[0:n]), ">") || strings.Contains(string(c.buf[0:n]), "]") || strings.Contains(string(c.buf[0:n]), "#") {
+			break
+		}
 	}
 	fmt.Printf(" login end %s\n", string(c.buf[0:n]))
-	/*
-		n, err = c.Write(c.Conn, []byte("enable\n"))
-		if err != nil {
-			return err
-		}
-
-		n, err = c.Conn.Read(c.buf[0:])
-		if err != nil {
-			return err
-		}
-		//fmt.Println(string(buf[0:n]))
-
-		n, err = c.Write(c.Conn, []byte(enable+"\n"))
-		if err != nil {
-			return err
-		}
-
-		n, err = c.Conn.Read(c.buf[0:])
-		if err != nil {
-			return err
-		}
-		//fmt.Println(string(buf[0:n]))
-
-		n, err = c.Write(c.Conn, []byte("terminal length 0\n"))
-		if err != nil {
-			return err
-		}
-
-		n, err = c.Conn.Read(c.buf[0:])
-		if err != nil {
-			return err
-		}
-		//fmt.Println(string(buf[0:n]))
-	*/
 	return err
 }
 
@@ -115,7 +94,7 @@ func (c *Client) Cmd(shell string) (context string, err error) {
 			break
 		}
 		context += string(c.buf[0:n])
-		if strings.HasSuffix(string(c.buf[0:n]), ">") || strings.HasSuffix(string(c.buf[0:n]), "]") || strings.HasSuffix(string(c.buf[0:n]), "#") || strings.HasSuffix(string(c.buf[0:n]), "Password: ") {
+		if strings.Contains(string(c.buf[0:n]), ">") || strings.Contains(string(c.buf[0:n]), "]") || strings.Contains(string(c.buf[0:n]), "#") || strings.Contains(string(c.buf[0:n]), "Password:") {
 			break
 		}
 	}
