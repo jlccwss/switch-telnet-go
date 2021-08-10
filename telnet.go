@@ -76,7 +76,8 @@ func (c *Client) Login(username string, password string) error {
 		if err != nil {
 			return err
 		}
-		if strings.Contains(string(c.buf[0:n]), "Invalid") || strings.Contains(string(c.buf[0:n]), "Error") {
+		fmt.Printf("read :[%s]\n", string(c.buf[0:n]))
+		if strings.Contains(string(c.buf[0:n]), "Invalid") || strings.Contains(string(c.buf[0:n]), "Error") || strings.Contains(string(c.buf[0:n]), "invalid") {
 			err = errors.New(string(c.buf[0:n]))
 			break
 		}
