@@ -45,7 +45,7 @@ func (c *Client) Connect(address string) (err error) {
 			break
 		}
 	}
-	c.Conn.SetDeadline(time.Now().Add(15 * time.Second))
+	c.Conn.SetDeadline(time.Now().Add(5 * time.Second))
 
 	return err
 }
@@ -75,6 +75,10 @@ func (c *Client) Login(username string, password string) error {
 		n, err = c.Conn.Read(c.buf[0:])
 		if err != nil {
 			return err
+		}
+		if strings.Contains(string(c.buf[0:n]), "Invalid") || strings.Contains(string(c.buf[0:n]), "Error") {
+			err = errors.New(string(c.buf[0:n]))
+			break
 		}
 		if strings.Contains(string(c.buf[0:n]), ">") || strings.Contains(string(c.buf[0:n]), "]") || strings.Contains(string(c.buf[0:n]), "#") {
 			break
