@@ -28,7 +28,7 @@ func (c *Client) Write(conn net.Conn, bufs []byte) (n int, err error) {
 }
 
 func (c *Client) Connect(address string) (err error) {
-	c.Conn, err = net.DialTimeout("tcp", address, 10*time.Second)
+	c.Conn, err = net.DialTimeout("tcp", address, 5*time.Second)
 	if err != nil {
 		return err
 	}
