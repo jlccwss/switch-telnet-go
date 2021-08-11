@@ -100,7 +100,7 @@ func (c *Client) Cmd(shell string) (context string, err error) {
 			break
 		}
 		context += string(c.buf[0:n])
-		if strings.Contains(context, "Invalid") || strings.Contains(context, "Error") {
+		if strings.Contains(context, "Invalid") || strings.Contains(context, "Error") || strings.Contains(context, "invalid") {
 			err = errors.New(context)
 			break
 		}
